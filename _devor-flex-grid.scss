@@ -1,0 +1,201 @@
+
+
+/*******************************
+ *      DEVOR FLEX GRID        *
+ *******************************
+ */
+
+// These should be overridden
+$grid-columns: 12;
+$grid-max-width: 90em;
+$grid-gutter: 1.5%;
+
+/*
+	Grid/Flexbox placeholders.
+ */
+
+// Flex containers usually live inside rows, are flexboxes, and have a max width.
+@mixin flex-container {
+	align-content: center;         // make all items in the container v align center, relative to the parent.
+	align-items: center;           // align items to center by default
+	display: flex;                 // use flexbox
+	flex-direction: row;           // treat it as rows not columns, ltr.
+	flex-wrap: wrap;               // let items wrap
+	justify-content: center;       // make items center align by default
+	margin: 0 (- $grid-gutter/2);
+	max-width: $grid-max-width;
+	width: (100 + $grid-gutter);
+}
+
+
+// These are container/flex modifiers
+@mixin flex-spaced {
+	justify-content: space-around;
+}
+
+@mixin flex-spread {
+	justify-content: space-between;
+}
+
+@mixin flex-valign-top {
+	align-items: flex-start;
+}
+
+@mixin flex-valign-bottom {
+	align-items: flex-end;
+}
+
+@mixin flex-equal-heights {
+	align-items: stretch;
+}
+
+@mixin flex-align-left {
+	justify-content: flex-start;
+}
+
+@mixin flex-align-right {
+	justify-content: flex-end;
+}
+
+@mixin flex-full-width {
+	max-width: 100 + $grid-gutter;
+}
+
+
+
+/*
+ Flex Column modifiers
+ */
+@mixin valign-top {
+	align-self: flex-start;
+}
+
+@mixin valign-bottom {
+	align-self: flex-end;
+}
+
+@mixin valign-middle {
+	align-self: center;
+}
+
+@mixin valign-stretch {
+	align-self: stretch;
+}
+
+/**
+ * Defines a grid column based off of size, breakpoint, and total columns.
+ * @param   {number}  $size      -             Size of the column
+ * @param   {string}  $bp-key   false          The breakpoint key for the column (ie: 'sm')
+ * @param   {number}  $columns  $grid-columns  The total number of columns in row.
+ */
+@mixin flex-col($size, $bp-key: false, $columns: $grid-columns) {
+	@if $bp-key {
+		@include media(">=#{$bp-key}") {
+			width: (100%/$columns * $size) - $grid-gutter;
+			margin: 0 ($grid-gutter/2);
+		}
+	}
+	@else {
+		width: (100%/$columns * $size) - $grid-gutter;
+		margin: 0 ($grid-gutter/2);
+	}
+}
+
+
+/**
+ * Offset a grid column either left side or right side by a number of columns
+ * @param   {number}  $offset
+ * @param   {string}  $direction:  'left'
+ * @param   {number}  $columns:    $grid-columns
+ */
+@mixin offset($offset, $direction: 'left', $columns: $grid-columns) {
+	$dir: if($direction == 'left', 'left', 'right');
+
+	margin-#{$dir}: ($offset/$columns * 100%);
+}
+
+
+// Rows hold the columns/
+.row {
+	@include flex-container;
+	text-align: left;
+
+	// modifiers
+	&.spaced {
+		@include flex-spaced;
+	}
+
+	&.spread {
+		@include flex-spread;
+	}
+
+	&.align-left {
+		@include flex-align-left;
+	}
+
+	&.align-right {
+		@include flex-align-right
+	}
+
+	&.valign-top {
+		@include flex-valign-top;
+	}
+
+	&.valign-bottom {
+		@include flex-valign-bottom;
+	}
+
+	&.equal-heights {
+		@include flex-equal-heights
+	}
+}
+
+// auto columns will fill the container, can give the element a min width.
+.col-auto {
+	flex: 2 1 auto;
+}
+
+// Let any individual columns be vertically aligned by itself to the top or bottom.
+[class*="col"] {
+	&.valign-top {
+		@include valign-top;
+	}
+
+	&.valign-bottom {
+		@include valign-bottom;
+	}
+
+	&.valign-middle {
+		@include valign-middle;
+	}
+}
+
+// Go through each column size and set up default col sizes
+@for $i from 1 through $grid-columns {
+	$_col-size : (100%/$grid-columns * $i);
+
+	.col-#{$i} {
+		@include flex-col($i);
+	}
+
+	.offset-#{$i} {
+		margin-left: $_col-size;
+	}
+}
+
+// // Make a class for each breakpoint and each column wihtin that breakpoint ie: .col-lg-12
+// @each $name, $val in $breakpoints {
+// 	@include media(">#{$name}") {
+// 		@for $i from 1 through $grid-columns {
+// 			.col-#{$name}-#{$i} {
+// 				width: (100%/$grid-columns * $i);
+// 			}
+// 			.offset-#{$name}-#{$i} {
+// 				margin-left:  ($i/$grid-columns * 100%);
+// 			}
+// 			.offset-right-#{$name}-#{$i} {
+// 				margin-right:  ($i/$grid-columns * 100%);
+// 			}
+// 		}
+// 	}
+// }
